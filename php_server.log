@@ -1,0 +1,85 @@
+[Wed Oct 21 03:02:27 2026] PHP 8.3.6 Development Server (http://127.0.0.1:8080) started
+[Wed Oct 21 03:02:29 2026] 127.0.0.1:48028 Accepted
+[Wed Oct 21 03:02:29 2026] 127.0.0.1:48028 [200]: HEAD /index.php
+[Wed Oct 21 03:02:29 2026] 127.0.0.1:48028 Closing
+[Wed Oct 21 03:02:38 2026] 127.0.0.1:51212 Accepted
+[Wed Oct 21 03:02:38 2026] 127.0.0.1:51212 [500]: POST /api/login.php
+[Wed Oct 21 03:02:38 2026] 127.0.0.1:51212 Closing
+[Wed Oct 21 03:02:59 2026] 127.0.0.1:39718 Accepted
+[Wed Oct 21 03:02:59 2026] 127.0.0.1:39718 [200]: POST /api/login.php
+[Wed Oct 21 03:02:59 2026] 127.0.0.1:39718 Closing
+[Wed Oct 21 03:03:07 2026] 127.0.0.1:38026 Accepted
+[Wed Oct 21 03:03:07 2026] 127.0.0.1:38026 [200]: GET /api/entities.php
+[Wed Oct 21 03:03:07 2026] 127.0.0.1:38026 Closing
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52622 Accepted
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52622 [200]: POST /api/create_transaction.php
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52622 Closing
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52632 Accepted
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52632 [200]: POST /api/create_transaction.php
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52632 Closing
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52642 Accepted
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52642 [200]: POST /api/create_transaction.php
+[Wed Oct 21 03:03:19 2026] 127.0.0.1:52642 Closing
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59738 Accepted
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59738 [200]: GET /api/transactions/list.php?entity_id=3&currency=USDT
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59738 Closing
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59740 Accepted
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59740 [200]: GET /api/reports/summary.php?currency=USDT
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59740 Closing
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59748 Accepted
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59748 [200]: GET /api/reports/summary.php?currency=INR
+[Wed Oct 21 03:03:28 2026] 127.0.0.1:59748 Closing
+[Wed Oct 21 03:03:37 2026] 127.0.0.1:57914 Accepted
+[Wed Oct 21 03:03:37 2026] 127.0.0.1:57914 [302]: GET /admin/index.php
+[Wed Oct 21 03:03:37 2026] 127.0.0.1:57914 Closing
+[Wed Oct 21 03:03:37 2026] 127.0.0.1:57916 Accepted
+[Wed Oct 21 03:03:37 2026] 127.0.0.1:57916 [302]: GET /admin/reports.php?report_type=trial_balance
+[Wed Oct 21 03:03:37 2026] 127.0.0.1:57916 Closing
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38972 Accepted
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38972 [200]: GET /index.php
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38972 Closing
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38984 Accepted
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38984 [302]: POST /index.php
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38984 Closing
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38986 Accepted
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38986 [200]: GET /admin/index.php
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:38986 Closing
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:39000 Accepted
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:39000 [200]: GET /admin/reports.php?report_type=trial_balance&currency=USDT
+[Wed Oct 21 03:03:47 2026] 127.0.0.1:39000 Closing
+[Wed Oct 21 03:04:30 2026] 127.0.0.1:42398 Accepted
+[Wed Oct 21 03:04:30 2026] 127.0.0.1:42398 [200]: GET /index.php
+[Wed Oct 21 03:04:30 2026] 127.0.0.1:42398 Closing
+[Wed Oct 21 03:04:30 2026] 127.0.0.1:42414 Accepted
+[Wed Oct 21 03:04:30 2026] 127.0.0.1:42414 [200]: GET /assets/css/style.css
+[Wed Oct 21 03:04:30 2026] 127.0.0.1:42414 Closing
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42430 Accepted
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42430 [302]: POST /index.php
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42430 Closing
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42442 Accepted
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42442 [200]: GET /admin/index.php
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42442 Closing
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42444 Accepted
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42452 Accepted
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42444 [200]: GET /assets/css/style.css
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42452 [200]: GET /assets/js/app.js
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42444 Closing
+[Wed Oct 21 03:04:31 2026] 127.0.0.1:42452 Closing
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42468 Accepted
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42468 [200]: GET /admin/reports.php
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42468 Closing
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42478 Accepted
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42482 Accepted
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42478 [200]: GET /assets/css/style.css
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42482 [200]: GET /assets/js/app.js
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42478 Closing
+[Wed Oct 21 03:04:34 2026] 127.0.0.1:42482 Closing
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42486 Accepted
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42486 [200]: GET /admin/reports.php?report_type=trial_balance&currency=INR&start_date=&end_date=
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42486 Closing
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42500 Accepted
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42504 Accepted
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42500 [200]: GET /assets/css/style.css
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42500 Closing
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42504 [200]: GET /assets/js/app.js
+[Wed Oct 21 03:04:35 2026] 127.0.0.1:42504 Closing
