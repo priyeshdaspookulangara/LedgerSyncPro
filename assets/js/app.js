@@ -1,20 +1,51 @@
 /* assets/js/app.js - Dynamic Interface & Helper JS */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Sidebar Toggle
+  // 1. Sidebar Toggle & Mobile Overlay
   const sidebarToggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.toggle('collapsed');
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile && sidebarOverlay) {
+      if (!sidebar.classList.contains('collapsed')) {
+        sidebarOverlay.classList.add('active');
+      } else {
+        sidebarOverlay.classList.remove('active');
+      }
+    } else {
+      localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+    }
+  }
 
   if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-      localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
-    });
+    sidebarToggle.addEventListener('click', toggleSidebar);
 
-    if (localStorage.getItem('sidebar_collapsed') === 'true') {
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.add('collapsed');
+        sidebarOverlay.classList.remove('active');
+      });
+    }
+
+    // Default mobile behavior: start collapsed
+    if (window.innerWidth <= 768) {
+      sidebar.classList.add('collapsed');
+    } else if (localStorage.getItem('sidebar_collapsed') === 'true') {
       sidebar.classList.add('collapsed');
     }
   }
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && sidebarOverlay) {
+      sidebarOverlay.classList.remove('active');
+    }
+  });
 
   // 2. Entity Currency Lock in Transaction Forms
   const entitySelect = document.getElementById('entity_id');
@@ -26,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (entitySelect) {
     entitySelect.addEventListener('change', () => {
       const selectedOption = entitySelect.options[entitySelect.selectedIndex];
-      const currency = selectedOption.getAttribute('data-currency');
+      const currency = selectedOption ? selectedOption.getAttribute('data-currency') : null;
 
       if (currency) {
         if (currencyDisplay) currencyDisplay.textContent = currency;
@@ -68,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         opt.disabled = true;
       }
     });
-    // Reset selection if currently selected option is hidden
     if (selectElement.selectedOptions[0] && selectElement.selectedOptions[0].disabled) {
       selectElement.value = '';
     }

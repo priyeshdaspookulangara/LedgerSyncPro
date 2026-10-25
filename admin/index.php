@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- Tab Switcher Bar -->
-<div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;">
+<div class="dash-tab-container">
     <button class="btn btn-inr dash-tab-btn active" data-currency="INR">
         <i class="fa-solid fa-indian-rupee-sign"></i> Total INR Metrics (Fiat Wing)
     </button>
