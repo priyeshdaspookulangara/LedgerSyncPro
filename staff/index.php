@@ -7,6 +7,46 @@ require_once __DIR__ . '/../includes/auth.php';
 $user = require_login();
 $conn = get_db_connection();
 
+$error = '';
+$success = $_GET['success'] ?? '';
+if (isset($_GET['error'])) {
+    $error = sanitize_input($_GET['error']);
+}
+
+// Handle Delete Request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_entry') {
+    $submitted_csrf = $_POST['csrf_token'] ?? '';
+    if (!verify_csrf_token($submitted_csrf)) {
+        $error = 'Invalid security token.';
+    } else {
+        $delete_id = intval($_POST['entry_id'] ?? 0);
+
+        // Fetch entry
+        $stmt_chk = $conn->prepare("SELECT id, created_by, currency FROM journal_entries WHERE id = ?");
+        $stmt_chk->bind_param("i", $delete_id);
+        $stmt_chk->execute();
+        $entry_row = $stmt_chk->get_result()->fetch_assoc();
+        $stmt_chk->close();
+
+        if (!$entry_row) {
+            $error = 'Transaction entry not found.';
+        } elseif ($user['role'] !== 'admin' && intval($entry_row['created_by']) !== intval($user['id'])) {
+            $error = 'Access denied: You can only delete entries created by yourself.';
+        } else {
+            // Delete entry (Cascades to journal_entry_lines in DB foreign key)
+            $stmt_del = $conn->prepare("DELETE FROM journal_entries WHERE id = ?");
+            $stmt_del->bind_param("i", $delete_id);
+            if ($stmt_del->execute()) {
+                log_audit_action($user['id'], "Deleted Journal Entry #$delete_id");
+                $success = "Journal Entry #$delete_id deleted successfully.";
+            } else {
+                $error = "Failed to delete entry.";
+            }
+            $stmt_del->close();
+        }
+    }
+}
+
 // Pagination & Filtering Params
 $entity_filter = intval($_GET['entity_id'] ?? 0);
 $currency_filter = sanitize_input($_GET['currency'] ?? '');
@@ -16,11 +56,7 @@ $limit = 15;
 $offset = ($page - 1) * $limit;
 
 // Fetch entities for filter dropdown
-$entities = [];
-$res_e = $conn->query("SELECT id, name, default_currency FROM entities WHERE status = 'active' ORDER BY name ASC");
-while ($e = $res_e->fetch_assoc()) {
-    $entities[] = $e;
-}
+$entities = $conn->query("SELECT id, name, default_currency FROM entities WHERE status = 'active' ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
 // Build query
 $where_clauses = ["je.created_by = " . intval($user['id'])];
@@ -39,11 +75,10 @@ if (!empty($search)) {
 $where_sql = "WHERE " . implode(" AND ", $where_clauses);
 
 // Count Total Entries
-$count_query = "SELECT COUNT(*) as total FROM journal_entries je $where_sql";
-$total_rows = $conn->query($count_query)->fetch_assoc()['total'];
+$total_rows = $conn->query("SELECT COUNT(*) as total FROM journal_entries je $where_sql")->fetch_assoc()['total'];
 $total_pages = ceil($total_rows / $limit);
 
-// Fetch Entries with Line Totals
+// Fetch Entries
 $sql = "SELECT je.id, je.entry_date, je.currency, je.reference_number, je.description, je.created_at,
                e.name AS entity_name,
                (SELECT SUM(debit) FROM journal_entry_lines WHERE journal_entry_id = je.id) AS total_amount
@@ -70,6 +105,13 @@ require_once __DIR__ . '/../includes/header.php';
         </a>
     </div>
     <div class="card-body">
+
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><i class="fa-solid fa-circle-xmark"></i> <?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
 
         <!-- Search & Filter Bar -->
         <form method="GET" action="/staff/index.php" class="filter-bar">
@@ -117,14 +159,13 @@ require_once __DIR__ . '/../includes/header.php';
                         <th>Reference / TxID</th>
                         <th>Description</th>
                         <th style="text-align: right;">Amount</th>
-                        <th>Posted At</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($transactions)): ?>
                         <tr>
                             <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                                <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 0.5rem;"></i><br>
                                 No transaction entries found matching your criteria.
                             </td>
                         </tr>
@@ -144,7 +185,22 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td style="text-align: right; font-weight: 600;">
                                     <?= number_format($tx['total_amount'], 2) ?> <?= $tx['currency'] ?>
                                 </td>
-                                <td><?= date('d M Y, H:i', strtotime($tx['created_at'])) ?></td>
+                                <td>
+                                    <div style="display: flex; gap: 0.3rem; justify-content: flex-end;">
+                                        <a href="/staff/edit_transaction.php?id=<?= $tx['id'] ?>" class="btn btn-secondary btn-sm" title="Edit Entry">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </a>
+
+                                        <form method="POST" action="/staff/index.php" onsubmit="return confirm('Are you sure you want to delete Journal Entry #<?= $tx['id'] ?>?');" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                            <input type="hidden" name="action" value="delete_entry">
+                                            <input type="hidden" name="entry_id" value="<?= $tx['id'] ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete Entry">
+                                                <i class="fa-solid fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

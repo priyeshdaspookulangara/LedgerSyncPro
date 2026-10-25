@@ -1,11 +1,35 @@
 <?php
-// admin/transactions.php - Company Transaction Audit Log
+// admin/transactions.php - Company Transaction Audit Log with Edit and Delete capabilities
 
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 
 $user = require_admin();
 $conn = get_db_connection();
+
+$error = '';
+$success = '';
+
+// Handle Delete Entry Action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_entry') {
+    $submitted_csrf = $_POST['csrf_token'] ?? '';
+    if (!verify_csrf_token($submitted_csrf)) {
+        $error = 'Invalid security token.';
+    } else {
+        $delete_id = intval($_POST['entry_id'] ?? 0);
+        if ($delete_id > 0) {
+            $stmt_del = $conn->prepare("DELETE FROM journal_entries WHERE id = ?");
+            $stmt_del->bind_param("i", $delete_id);
+            if ($stmt_del->execute()) {
+                log_audit_action($user['id'], "Admin Deleted Journal Entry #$delete_id");
+                $success = "Journal Entry #$delete_id has been deleted permanently.";
+            } else {
+                $error = "Failed to delete transaction entry.";
+            }
+            $stmt_del->close();
+        }
+    }
+}
 
 // Filters
 $entity_filter = intval($_GET['entity_id'] ?? 0);
@@ -69,6 +93,13 @@ require_once __DIR__ . '/../includes/header.php';
         </button>
     </div>
     <div class="card-body">
+
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><i class="fa-solid fa-circle-xmark"></i> <?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
 
         <!-- Search & Filter Bar -->
         <form method="GET" action="/admin/transactions.php" class="filter-bar">
@@ -134,7 +165,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <th>Description</th>
                         <th>Logged By</th>
                         <th style="text-align: right;">Total Amount</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -162,9 +193,24 @@ require_once __DIR__ . '/../includes/header.php';
                                     <?= number_format($je['total_amount'], 2) ?> <?= $je['currency'] ?>
                                 </td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" onclick="toggleLinesRow(<?= $je['id'] ?>)">
-                                        <i class="fa-solid fa-magnifying-glass"></i> Lines
-                                    </button>
+                                    <div style="display: flex; gap: 0.3rem;">
+                                        <button class="btn btn-secondary btn-sm" onclick="toggleLinesRow(<?= $je['id'] ?>)" title="View Lines">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </button>
+
+                                        <a href="/staff/edit_transaction.php?id=<?= $je['id'] ?>" class="btn btn-secondary btn-sm" title="Edit Entry">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </a>
+
+                                        <form method="POST" action="/admin/transactions.php" onsubmit="return confirm('Are you sure you want to delete Journal Entry #<?= $je['id'] ?> permanently?');" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                            <input type="hidden" name="action" value="delete_entry">
+                                            <input type="hidden" name="entry_id" value="<?= $je['id'] ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete Entry">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
 
