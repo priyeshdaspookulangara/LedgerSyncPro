@@ -43,7 +43,7 @@ $csrf_token = generate_csrf_token();
                 <a href="/admin/users.php" class="menu-item <?= $active_nav === 'admin_users' ? 'active' : '' ?>">
                     <i class="fa-solid fa-users-gear"></i> <span>User & Staff Directory</span>
                 </a>
-                <a href="/admin/accounts.php" class="menu-item <?= $active_nav === 'admin_accounts' ? 'active' : '' ?>">
+                <a href="/accounts.php" class="menu-item <?= $active_nav === 'accounts' ? 'active' : '' ?>">
                     <i class="fa-solid fa-sitemap"></i> <span>Chart of Accounts</span>
                 </a>
                 <a href="/admin/transactions.php" class="menu-item <?= $active_nav === 'admin_transactions' ? 'active' : '' ?>">
@@ -57,6 +57,9 @@ $csrf_token = generate_csrf_token();
             <div class="menu-category">STAFF PORTAL</div>
             <a href="/staff/index.php" class="menu-item <?= $active_nav === 'staff_dashboard' ? 'active' : '' ?>">
                 <i class="fa-solid fa-list-check"></i> <span>My Entry Log</span>
+            </a>
+            <a href="/accounts.php" class="menu-item <?= $active_nav === 'accounts' && $current_user['role'] === 'staff' ? 'active' : '' ?>">
+                <i class="fa-solid fa-sitemap"></i> <span>Account Heads</span>
             </a>
             <a href="/staff/add_transaction.php" class="menu-item <?= $active_nav === 'staff_add_tx' ? 'active' : '' ?>">
                 <i class="fa-solid fa-square-plus"></i> <span>New Journal Entry</span>

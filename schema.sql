@@ -103,29 +103,4 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password_hash`, `role`, `statu
 ON DUPLICATE KEY UPDATE `full_name` = VALUES(`full_name`);
 
 -- Chart of Accounts
-INSERT INTO `chart_of_accounts` (`id`, `account_code`, `account_name`, `account_type`, `currency_type`) VALUES
--- Assets
-(1, '1010', 'Cash in Hand', 'Asset', 'INR'),
-(2, '1020', 'Operating Bank Account', 'Asset', 'INR'),
-(3, '1030', 'USDT Crypto Wallet', 'Asset', 'USDT'),
-
--- Liabilities
-(4, '2010', 'GST Payable', 'Liability', 'INR'),
-(5, '2020', 'MLM Leader Commission Payable', 'Liability', 'USDT'),
-
--- Equity
-(6, '3010', 'Owner Equity', 'Equity', 'BOTH'),
-
--- Income
-(7, '4010', 'Service Revenue (Consultation & GST)', 'Income', 'INR'),
-(8, '4020', 'Product Sales Revenue (Burfee Cart)', 'Income', 'INR'),
-(9, '4030', 'MLM Subscription & Network Income', 'Income', 'USDT'),
-(10, '4040', 'Global Impact Project Revenue', 'Income', 'USDT'),
-
--- Expense
-(11, '5010', 'Operational Expenses', 'Expense', 'BOTH'),
-(12, '5020', 'MLM Leader Payout Expense', 'Expense', 'USDT'),
-(13, '5030', 'Blockchain Gas Fees', 'Expense', 'USDT'),
-(14, '5040', 'Burfee Cart Raw Material Expense', 'Expense', 'INR'),
-(15, '5050', 'Office & Administrative Expense', 'Expense', 'INR')
-ON DUPLICATE KEY UPDATE `account_name` = VALUES(`account_name`);
+-- Chart of Accounts table starts clean as requested. Custom account heads can be added by Admin and Staff.
