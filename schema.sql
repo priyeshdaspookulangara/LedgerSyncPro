@@ -103,4 +103,13 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password_hash`, `role`, `statu
 ON DUPLICATE KEY UPDATE `full_name` = VALUES(`full_name`);
 
 -- Chart of Accounts
--- Chart of Accounts table starts clean as requested. Custom account heads can be added by Admin and Staff.
+-- Chart of Accounts (Basic Generic Account Heads)
+INSERT INTO `chart_of_accounts` (`id`, `account_code`, `account_name`, `account_type`, `currency_type`) VALUES
+(1, '1010', 'Cash in Hand', 'Asset', 'INR'),
+(2, '1020', 'Bank Account', 'Asset', 'INR'),
+(3, '1030', 'USDT Wallet', 'Asset', 'USDT'),
+(4, '2010', 'Liabilities / Payable', 'Liability', 'BOTH'),
+(5, '3010', 'Owner Equity', 'Equity', 'BOTH'),
+(6, '4010', 'General Revenue / Income', 'Income', 'BOTH'),
+(7, '5010', 'General Expense', 'Expense', 'BOTH')
+ON DUPLICATE KEY UPDATE `account_name` = VALUES(`account_name`);
