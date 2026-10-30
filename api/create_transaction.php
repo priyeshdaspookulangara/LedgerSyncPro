@@ -20,6 +20,17 @@ $raw_input = file_get_contents('php://input');
 $data = json_decode($raw_input, true) ?? $_POST;
 
 $entity_id = intval($data['entity_id'] ?? 0);
+
+// If no entity provided, default to TAX-India
+if (!$entity_id) {
+    $stmt_default = $conn->prepare("SELECT id FROM entities WHERE name = 'TAX-India' AND status = 'active' LIMIT 1");
+    $stmt_default->execute();
+    if ($row_default = $stmt_default->get_result()->fetch_assoc()) {
+        $entity_id = intval($row_default['id']);
+    }
+    $stmt_default->close();
+}
+
 $tx_type = sanitize_input($data['tx_type'] ?? 'income');
 $entry_date = sanitize_input($data['entry_date'] ?? date('Y-m-d'));
 $reference_number = sanitize_input($data['reference_number'] ?? '');

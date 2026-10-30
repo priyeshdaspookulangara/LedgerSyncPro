@@ -67,6 +67,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $entry_mode = sanitize_input($_POST['entry_mode'] ?? 'quick');
         $entity_id = intval($_POST['entity_id'] ?? 0);
+
+        // Fallback to TAX-India if no entity specified
+        if (!$entity_id) {
+            $stmt_default = $conn->prepare("SELECT id FROM entities WHERE name = 'TAX-India' AND status = 'active' LIMIT 1");
+            $stmt_default->execute();
+            if ($row_default = $stmt_default->get_result()->fetch_assoc()) {
+                $entity_id = intval($row_default['id']);
+            }
+            $stmt_default->close();
+        }
+
         $tx_type = sanitize_input($_POST['tx_type'] ?? 'income');
         $entry_date = sanitize_input($_POST['entry_date'] ?? date('Y-m-d'));
         $reference_number = sanitize_input($_POST['reference_number'] ?? '');
@@ -236,11 +247,12 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Entity & Type -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="entity_id">Business Unit / Entity <span style="color:red;">*</span></label>
-                    <select class="form-select" id="entity_id" name="entity_id" onchange="updateEntityCurrency()" required>
+                    <label class="form-label" for="entity_id">Business Unit / Entity (Default: TAX-India)</label>
+                    <select class="form-select" id="entity_id" name="entity_id" onchange="updateEntityCurrency()">
                         <option value="">-- Select Business Entity --</option>
                         <?php foreach ($entities as $ent): ?>
-                            <option value="<?= $ent['id'] ?>" data-currency="<?= $ent['default_currency'] ?>">
+                            <?php $is_tax_india = ($ent['name'] === 'TAX-India'); ?>
+                            <option value="<?= $ent['id'] ?>" data-currency="<?= $ent['default_currency'] ?>" <?= $is_tax_india ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($ent['name']) ?> (<?= $ent['default_currency'] ?>)
                             </option>
                         <?php endforeach; ?>
@@ -355,6 +367,10 @@ function updateEntityCurrency() {
         display.textContent = 'Select Entity';
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateEntityCurrency();
+});
 
 function filterCategoryAccounts() {
     const txType = document.getElementById('tx_type').value;

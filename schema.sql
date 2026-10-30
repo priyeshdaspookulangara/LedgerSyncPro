@@ -93,7 +93,8 @@ INSERT INTO `entities` (`id`, `name`, `default_currency`, `status`) VALUES
 (1, 'Consultation & GST Services', 'INR', 'active'),
 (2, 'Burfee Cart', 'INR', 'active'),
 (3, 'Optimus Infinity', 'USDT', 'active'),
-(4, 'Rayon Global Impact', 'USDT', 'active')
+(4, 'Rayon Global Impact', 'USDT', 'active'),
+(5, 'TAX-India', 'INR', 'active')
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
 
 -- Default Users (Password: admin123 / staff123)
