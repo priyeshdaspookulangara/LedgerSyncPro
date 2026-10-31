@@ -10,9 +10,9 @@ $conn = get_db_connection();
 $error = '';
 $success = '';
 
-// Fetch active entities
+// Fetch active entities (TAX-India first as primary default)
 $entities = [];
-$res_entities = $conn->query("SELECT id, name, default_currency FROM entities WHERE status = 'active' ORDER BY name ASC");
+$res_entities = $conn->query("SELECT id, name, default_currency FROM entities WHERE status = 'active' ORDER BY (name = 'TAX-India') DESC, name ASC");
 while ($row = $res_entities->fetch_assoc()) {
     $entities[] = $row;
 }
@@ -247,15 +247,15 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Entity & Type -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="entity_id">Business Unit / Entity (Default: TAX-India)</label>
+                    <label class="form-label" for="entity_id">Business Unit / Entity <span class="badge badge-success" style="font-size:0.75rem; vertical-align:middle;">Default: TAX-India</span></label>
                     <select class="form-select" id="entity_id" name="entity_id" onchange="updateEntityCurrency()">
-                        <option value="">-- Select Business Entity --</option>
                         <?php foreach ($entities as $ent): ?>
                             <?php $is_tax_india = ($ent['name'] === 'TAX-India'); ?>
                             <option value="<?= $ent['id'] ?>" data-currency="<?= $ent['default_currency'] ?>" <?= $is_tax_india ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($ent['name']) ?> (<?= $ent['default_currency'] ?>)
+                                <?= htmlspecialchars($ent['name']) ?> (<?= $ent['default_currency'] ?>)<?= $is_tax_india ? ' [Default]' : '' ?>
                             </option>
                         <?php endforeach; ?>
+                        <option value="">-- Other / Unassigned Entity --</option>
                     </select>
                 </div>
 
