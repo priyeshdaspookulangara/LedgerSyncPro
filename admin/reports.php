@@ -117,7 +117,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="margin-bottom: 1rem; text-align: center;">
                 <h2>Profit & Loss Statement (<?= $selected_currency ?>)</h2>
                 <p style="color: var(--text-muted);">
-                    Iso-currency accounting for <?= $selected_currency === 'INR' ? 'Consultation & GST Services, Burfee Cart' : 'Optimus Infinity, Rayon Global Impact' ?>
+                    Isolated currency accounting across all entities for <?= $selected_currency ?> operations
                 </p>
             </div>
 

@@ -78,6 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_default->close();
         }
 
+        $currency = sanitize_input($_POST['currency'] ?? 'INR');
+        if (!in_array($currency, ['INR', 'USDT'])) {
+            $currency = 'INR';
+        }
         $tx_type = sanitize_input($_POST['tx_type'] ?? 'income');
         $entry_date = sanitize_input($_POST['entry_date'] ?? date('Y-m-d'));
         $reference_number = sanitize_input($_POST['reference_number'] ?? '');
@@ -85,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $amount = floatval($_POST['amount'] ?? 0);
         $category_account_id = intval($_POST['category_account_id'] ?? 0);
 
-        // Fetch selected entity default currency
+        // Fetch selected entity details
         $stmt_e = $conn->prepare("SELECT name, default_currency FROM entities WHERE id = ? AND status = 'active'");
         $stmt_e->bind_param("i", $entity_id);
         $stmt_e->execute();
@@ -99,7 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!$category_account_id) {
             $error = 'Please select a Category / Account Head.';
         } else {
-            $currency = $entity_data['default_currency'];
             $payment_account_id = 0;
 
             if ($entry_mode === 'quick') {
@@ -218,7 +221,7 @@ require_once __DIR__ . '/../includes/header.php';
             <i class="fa-solid fa-bolt" style="color: var(--crypto-gold);"></i> Quick Transaction Entry
         </div>
         <span class="badge badge-info" id="currency_indicator_badge">
-            Entity Currency: <strong id="currency_display">Select Entity</strong>
+            Selected Currency: <strong id="currency_display">INR (₹)</strong>
         </span>
     </div>
 
@@ -244,21 +247,32 @@ require_once __DIR__ . '/../includes/header.php';
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
             <input type="hidden" name="entry_mode" id="entry_mode_input" value="quick">
 
-            <!-- Entity & Type -->
+            <!-- Currency & Entity Row -->
             <div class="form-row">
                 <div class="form-group">
+                    <label class="form-label" for="currency_select">Currency <span style="color:red;">*</span></label>
+                    <select class="form-select" id="currency_select" name="currency" onchange="onCurrencyChanged()" required style="font-weight: 600;">
+                        <option value="INR" selected>₹ INR - Indian Rupee (Fiat)</option>
+                        <option value="USDT">$ USDT - Tether (Crypto)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label" for="entity_id">Business Unit / Entity <span class="badge badge-success" style="font-size:0.75rem; vertical-align:middle;">Default: TAX-India</span></label>
-                    <select class="form-select" id="entity_id" name="entity_id" onchange="updateEntityCurrency()">
+                    <select class="form-select" id="entity_id" name="entity_id">
                         <?php foreach ($entities as $ent): ?>
                             <?php $is_tax_india = ($ent['name'] === 'TAX-India'); ?>
-                            <option value="<?= $ent['id'] ?>" data-currency="<?= $ent['default_currency'] ?>" <?= $is_tax_india ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($ent['name']) ?> (<?= $ent['default_currency'] ?>)<?= $is_tax_india ? ' [Default]' : '' ?>
+                            <option value="<?= $ent['id'] ?>" <?= $is_tax_india ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($ent['name']) ?><?= $is_tax_india ? ' [Default Entity]' : '' ?>
                             </option>
                         <?php endforeach; ?>
                         <option value="">-- Other / Unassigned Entity --</option>
                     </select>
                 </div>
+            </div>
 
+            <!-- Transaction Type -->
+            <div class="form-row">
                 <div class="form-group">
                     <label class="form-label" for="tx_type">Transaction Type <span style="color:red;">*</span></label>
                     <select class="form-select" id="tx_type" name="tx_type" onchange="filterCategoryAccounts()" required>
@@ -271,7 +285,7 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Amount & Account Head -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="amount">Amount <span style="color:red;">*</span></label>
+                    <label class="form-label" for="amount">Amount <span id="amount_currency_symbol">(₹)</span> <span style="color:red;">*</span></label>
                     <input type="number" step="0.0001" min="0.0001" class="form-control" id="amount" name="amount" placeholder="e.g. 500.00" required>
                 </div>
 
@@ -355,39 +369,64 @@ function setEntryMode(mode) {
     }
 }
 
-function updateEntityCurrency() {
-    const select = document.getElementById('entity_id');
-    const selectedOption = select.options[select.selectedIndex];
-    const currency = selectedOption.getAttribute('data-currency');
+function onCurrencyChanged() {
+    const curr = document.getElementById('currency_select').value;
     const display = document.getElementById('currency_display');
+    const symbolLabel = document.getElementById('amount_currency_symbol');
 
-    if (currency) {
-        display.textContent = currency;
-    } else {
-        display.textContent = 'Select Entity';
+    display.textContent = curr === 'INR' ? 'INR (₹)' : 'USDT ($)';
+    symbolLabel.textContent = curr === 'INR' ? '(₹)' : '($)';
+
+    filterCategoryAccounts();
+    filterPaymentAccounts();
+}
+
+function filterPaymentAccounts() {
+    const curr = document.getElementById('currency_select').value;
+    const paymentSelect = document.getElementById('payment_account_id');
+    if (!paymentSelect) return;
+    const options = paymentSelect.options;
+
+    for (let i = 1; i < options.length; i++) {
+        const accCurrency = options[i].getAttribute('data-currency');
+        if (accCurrency === 'BOTH' || accCurrency === curr) {
+            options[i].style.display = 'block';
+        } else {
+            options[i].style.display = 'none';
+        }
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    updateEntityCurrency();
-});
-
 function filterCategoryAccounts() {
     const txType = document.getElementById('tx_type').value;
+    const curr = document.getElementById('currency_select').value;
     const categorySelect = document.getElementById('category_account_id');
     const options = categorySelect.options;
 
     for (let i = 1; i < options.length; i++) {
         const accType = options[i].getAttribute('data-type');
+        const accCurr = options[i].getAttribute('data-currency');
+
+        let show = true;
+        // Filter by Transaction Type (Income vs Expense)
         if (txType === 'income' && accType === 'Expense') {
-            options[i].style.display = 'none';
+            show = false;
         } else if (txType === 'expense' && accType === 'Income') {
-            options[i].style.display = 'none';
-        } else {
-            options[i].style.display = 'block';
+            show = false;
         }
+
+        // Filter by Currency
+        if (accCurr !== 'BOTH' && accCurr !== curr) {
+            show = false;
+        }
+
+        options[i].style.display = show ? 'block' : 'none';
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    onCurrencyChanged();
+});
 </script>
 
 <?php

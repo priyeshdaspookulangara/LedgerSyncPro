@@ -97,6 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category_account_id = intval($_POST['category_account_id'] ?? 0);
 
         // Fetch selected entity
+        $currency = sanitize_input($_POST['currency'] ?? 'INR');
+        if (!in_array($currency, ['INR', 'USDT'])) {
+            $currency = 'INR';
+        }
+
         $stmt_e = $conn->prepare("SELECT name, default_currency FROM entities WHERE id = ? AND status = 'active'");
         $stmt_e->bind_param("i", $entity_id);
         $stmt_e->execute();
@@ -112,7 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($payment_account_id === $category_account_id) {
             $error = 'Payment Account and Category Account cannot be identical.';
         } else {
-            $currency = $entity_info['default_currency'];
 
             $debit_account_id = 0;
             $credit_account_id = 0;
@@ -204,11 +208,19 @@ require_once __DIR__ . '/../includes/header.php';
 
             <div class="form-row">
                 <div class="form-group">
+                    <label class="form-label" for="currency_select">Currency <span style="color:red;">*</span></label>
+                    <select class="form-select" id="currency_select" name="currency" required>
+                        <option value="INR" <?= $je_data['currency'] === 'INR' ? 'selected' : '' ?>>₹ INR - Indian Rupee (Fiat)</option>
+                        <option value="USDT" <?= $je_data['currency'] === 'USDT' ? 'selected' : '' ?>>$ USDT - Tether (Crypto)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label" for="entity_id">Business Unit / Entity <span style="color:red;">*</span></label>
                     <select class="form-select" id="entity_id" name="entity_id" required>
                         <?php foreach ($entities as $ent): ?>
-                            <option value="<?= $ent['id'] ?>" data-currency="<?= $ent['default_currency'] ?>" <?= $je_data['entity_id'] == $ent['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($ent['name']) ?> (<?= $ent['default_currency'] ?>)
+                            <option value="<?= $ent['id'] ?>" <?= $je_data['entity_id'] == $ent['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($ent['name']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

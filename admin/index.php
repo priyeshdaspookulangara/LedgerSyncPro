@@ -30,17 +30,19 @@ $inr_expense = floatval($inr_expense_res['total_expense'] ?? 0);
 
 $inr_net_profit = $inr_income - $inr_expense;
 
-// INR Entity breakdown
+// INR Entity breakdown (based on transactions logged with currency = 'INR')
 $inr_entities_res = $conn->query("
     SELECT e.id, e.name,
-           COALESCE(SUM(CASE WHEN a.account_type = 'Income' THEN (l.credit - l.debit) ELSE 0 END), 0) as income,
-           COALESCE(SUM(CASE WHEN a.account_type = 'Expense' THEN (l.debit - l.credit) ELSE 0 END), 0) as expense
+           COALESCE(SUM(CASE WHEN a.account_type = 'Income' AND je.currency = 'INR' THEN (l.credit - l.debit) ELSE 0 END), 0) as income,
+           COALESCE(SUM(CASE WHEN a.account_type = 'Expense' AND je.currency = 'INR' THEN (l.debit - l.credit) ELSE 0 END), 0) as expense
     FROM entities e
-    LEFT JOIN journal_entries je ON je.entity_id = e.id
+    LEFT JOIN journal_entries je ON je.entity_id = e.id AND je.currency = 'INR'
     LEFT JOIN journal_entry_lines l ON l.journal_entry_id = je.id
     LEFT JOIN chart_of_accounts a ON l.account_id = a.id
-    WHERE e.default_currency = 'INR'
+    WHERE e.status = 'active'
     GROUP BY e.id, e.name
+    HAVING income > 0 OR expense > 0 OR e.name = 'TAX-India'
+    ORDER BY (e.name = 'TAX-India') DESC, e.name ASC
 ")->fetch_all(MYSQLI_ASSOC);
 
 
@@ -67,17 +69,19 @@ $usdt_expense = floatval($usdt_expense_res['total_expense'] ?? 0);
 
 $usdt_net_profit = $usdt_income - $usdt_expense;
 
-// USDT Entity breakdown
+// USDT Entity breakdown (based on transactions logged with currency = 'USDT')
 $usdt_entities_res = $conn->query("
     SELECT e.id, e.name,
-           COALESCE(SUM(CASE WHEN a.account_type = 'Income' THEN (l.credit - l.debit) ELSE 0 END), 0) as income,
-           COALESCE(SUM(CASE WHEN a.account_type = 'Expense' THEN (l.debit - l.credit) ELSE 0 END), 0) as expense
+           COALESCE(SUM(CASE WHEN a.account_type = 'Income' AND je.currency = 'USDT' THEN (l.credit - l.debit) ELSE 0 END), 0) as income,
+           COALESCE(SUM(CASE WHEN a.account_type = 'Expense' AND je.currency = 'USDT' THEN (l.debit - l.credit) ELSE 0 END), 0) as expense
     FROM entities e
-    LEFT JOIN journal_entries je ON je.entity_id = e.id
+    LEFT JOIN journal_entries je ON je.entity_id = e.id AND je.currency = 'USDT'
     LEFT JOIN journal_entry_lines l ON l.journal_entry_id = je.id
     LEFT JOIN chart_of_accounts a ON l.account_id = a.id
-    WHERE e.default_currency = 'USDT'
+    WHERE e.status = 'active'
     GROUP BY e.id, e.name
+    HAVING income > 0 OR expense > 0 OR e.name IN ('Optimus Infinity', 'Rayon Global Impact', 'TAX-India')
+    ORDER BY (e.name = 'TAX-India') DESC, e.name ASC
 ")->fetch_all(MYSQLI_ASSOC);
 
 // Recent Audit Logs

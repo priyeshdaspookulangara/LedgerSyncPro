@@ -51,6 +51,11 @@ $tx_type = sanitize_input($data['tx_type'] ?? 'income');
 $entry_date = sanitize_input($data['entry_date'] ?? date('Y-m-d'));
 $reference_number = sanitize_input($data['reference_number'] ?? '');
 $description = sanitize_input($data['description'] ?? '');
+$currency = sanitize_input($data['currency'] ?? 'INR');
+if (!in_array($currency, ['INR', 'USDT'])) {
+    $currency = 'INR';
+}
+
 $amount = floatval($data['amount'] ?? 0);
 $payment_account_id = intval($data['payment_account_id'] ?? 0);
 $category_account_id = intval($data['category_account_id'] ?? 0);
@@ -85,8 +90,6 @@ if ($payment_account_id === $category_account_id) {
     echo json_encode(['success' => false, 'error' => 'Payment account and Category account cannot be the same']);
     exit;
 }
-
-$currency = $entity_info['default_currency'];
 
 $debit_account_id = 0;
 $credit_account_id = 0;

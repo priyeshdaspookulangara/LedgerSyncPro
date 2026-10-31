@@ -31,6 +31,11 @@ if (!$entity_id) {
     $stmt_default->close();
 }
 
+$currency = sanitize_input($data['currency'] ?? 'INR');
+if (!in_array($currency, ['INR', 'USDT'])) {
+    $currency = 'INR';
+}
+
 $tx_type = sanitize_input($data['tx_type'] ?? 'income');
 $entry_date = sanitize_input($data['entry_date'] ?? date('Y-m-d'));
 $reference_number = sanitize_input($data['reference_number'] ?? '');
@@ -58,6 +63,18 @@ if ($amount <= 0) {
     exit;
 }
 
+// Auto-resolve payment account if not supplied
+if (!$payment_account_id) {
+    $stmt_acc = $conn->prepare("SELECT id FROM chart_of_accounts WHERE account_type = 'Asset' AND (currency_type = ? OR currency_type = 'BOTH') ORDER BY id ASC LIMIT 1");
+    $stmt_acc->bind_param("s", $currency);
+    $stmt_acc->execute();
+    $row_acc = $stmt_acc->get_result()->fetch_assoc();
+    $stmt_acc->close();
+    if ($row_acc) {
+        $payment_account_id = intval($row_acc['id']);
+    }
+}
+
 if (!$payment_account_id || !$category_account_id) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Payment account and Category account are required']);
@@ -69,8 +86,6 @@ if ($payment_account_id === $category_account_id) {
     echo json_encode(['success' => false, 'error' => 'Payment account and Category account cannot be the same']);
     exit;
 }
-
-$currency = $entity_data['default_currency'];
 
 // Map Accounts for Double Entry
 $debit_account_id = 0;

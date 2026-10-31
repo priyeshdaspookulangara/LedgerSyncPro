@@ -40,14 +40,16 @@ $net_profit = $total_income - $total_expense;
 // 3. Entity Breakdown
 $entities_res = $conn->query("
     SELECT e.id, e.name,
-           COALESCE(SUM(CASE WHEN a.account_type = 'Income' THEN (l.credit - l.debit) ELSE 0 END), 0) as income,
-           COALESCE(SUM(CASE WHEN a.account_type = 'Expense' THEN (l.debit - l.credit) ELSE 0 END), 0) as expense
+           COALESCE(SUM(CASE WHEN a.account_type = 'Income' AND je.currency = '$currency' THEN (l.credit - l.debit) ELSE 0 END), 0) as income,
+           COALESCE(SUM(CASE WHEN a.account_type = 'Expense' AND je.currency = '$currency' THEN (l.debit - l.credit) ELSE 0 END), 0) as expense
     FROM entities e
-    LEFT JOIN journal_entries je ON je.entity_id = e.id
+    LEFT JOIN journal_entries je ON je.entity_id = e.id AND je.currency = '$currency'
     LEFT JOIN journal_entry_lines l ON l.journal_entry_id = je.id
     LEFT JOIN chart_of_accounts a ON l.account_id = a.id
-    WHERE e.default_currency = '$currency'
+    WHERE e.status = 'active'
     GROUP BY e.id, e.name
+    HAVING income > 0 OR expense > 0 OR e.name = 'TAX-India'
+    ORDER BY (e.name = 'TAX-India') DESC, e.name ASC
 ")->fetch_all(MYSQLI_ASSOC);
 
 foreach ($entities_res as &$ent) {

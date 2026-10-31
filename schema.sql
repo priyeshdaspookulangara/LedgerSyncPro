@@ -7,7 +7,7 @@ USE `accounting_db`;
 CREATE TABLE IF NOT EXISTS `entities` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(150) NOT NULL,
-  `default_currency` ENUM('INR', 'USDT') NOT NULL,
+  `default_currency` ENUM('INR', 'USDT', 'BOTH') NOT NULL DEFAULT 'BOTH',
   `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -90,11 +90,11 @@ CREATE TABLE IF NOT EXISTS `api_tokens` (
 
 -- Entities
 INSERT INTO `entities` (`id`, `name`, `default_currency`, `status`) VALUES
-(1, 'Consultation & GST Services', 'INR', 'active'),
-(2, 'Burfee Cart', 'INR', 'active'),
-(3, 'Optimus Infinity', 'USDT', 'active'),
-(4, 'Rayon Global Impact', 'USDT', 'active'),
-(5, 'TAX-India', 'INR', 'active')
+(1, 'Consultation & GST Services', 'BOTH', 'active'),
+(2, 'Burfee Cart', 'BOTH', 'active'),
+(3, 'Optimus Infinity', 'BOTH', 'active'),
+(4, 'Rayon Global Impact', 'BOTH', 'active'),
+(5, 'TAX-India', 'BOTH', 'active')
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
 
 -- Default Users (Password: admin123 / staff123)
